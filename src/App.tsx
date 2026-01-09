@@ -3,12 +3,12 @@ import "./reset.css";
 import "./App.css";
 import Router from "./components/Router";
 
-function App() {
+const App: React.FC = () => {
     return (
         <div className="container">
             <Router />
         </div>
     );
-}
+};
 
 export default App;

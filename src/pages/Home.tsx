@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, ChangeEvent } from 'react';
 import Header from './../components/Header';
 import { connect } from 'react-redux';
 import BookList from '../components/BookList';
@@ -6,23 +6,36 @@ import { filterByValue, sortByAuthor, sortByDate, handleInitialData } from '../a
 import SearchBtn from '../components/SearchBtn';
 import Spinner from '../components/Spinner';
 
-class Home extends Component {
+/* ---------- Types ---------- */
+
+interface HomeState {
+    ready: boolean;
+}
+
+interface HomeProps {
+    handleInitialData: () => Promise<void>;
+    filterByValue: (value: string) => void;
+    sortByAuthor: () => void;
+    sortByDate: () => void;
+}
+
+class Home extends Component<HomeProps, HomeState> {
+    state: HomeState = {
+        ready: false,
+    };
+
 	componentDidMount() {
 		this.props.handleInitialData().then(() => this.setState({ ready: true }));
 	}
 
-	state = {
-		ready: false
-	};
-
 	/* handle the filtering of books */
-	filterBooks = (e) => {
+	filterBooks = (e: ChangeEvent<HTMLInputElement>) => {
 		const input = e.target.value;
 		this.props.filterByValue(input);
 	};
 
 	/* handle the sorting of books based on author or date */
-	handleSortedList = (e) => {
+	handleSortedList = (e: ChangeEvent<HTMLSelectElement>) => {
 		let sortBy = e.target.value;
 		if (sortBy === 'By Author') {
 			this.props.sortByAuthor();

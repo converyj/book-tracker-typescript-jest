@@ -9,15 +9,14 @@ import NoMatch from './NoMatch';
  * @description Handle all the routes
  */
 
-const Router = () => {
-	return (
-		<Switch>
-			<Route exact path="/" component={Home} />
-
-			<Route exact path="/search" component={Search} />
-			<Route component={NoMatch} />
-		</Switch>
-	);
+const Router: React.FC = () => {
+    return (
+        <Switch>
+            <Route exact path="/" component={Home} />
+            <Route exact path="/search" component={Search} />
+            <Route component={NoMatch} />
+        </Switch>
+    );
 };
 
 export default Router;

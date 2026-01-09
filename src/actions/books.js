@@ -95,8 +95,10 @@ export function handleAddBook(book) {
 				dispatch(addBook(formattedBook));
 			})
 			.then(() => dispatch(hideLoading()))
-			.catch((err) =>
+			.catch((err) => {
+                console.log('add book error');
 				alert('Error occurred while trying to add book. Try Again', err.message)
+            }
 			);
 	};
 }

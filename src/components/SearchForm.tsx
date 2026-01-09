@@ -1,35 +1,70 @@
-import React, { Component, useRef } from 'react';
+import React, { Component, useRef, ChangeEvent } from 'react';
 import Dropdown from './Dropdown';
 import './searchForm.css';
-import { handleAddBook } from './../actions/books';
-import { connect } from 'react-redux';
+import { handleAddBook } from '../actions/books';
+import { connect, ConnectedProps } from 'react-redux';
 import AddRating from './AddRating';
 import DatePicker from './DatePicker';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { BookType } from './Book';
 
 /**
  * @description Save input field state and add book 
  */
-class SearchForm extends Component {
-    constructor(props) {
+
+/* ---------- Types ---------- */
+
+interface SearchFormState {
+    book: BookType; 
+    title: string;
+    date: string;
+    comment: string;
+    rate: number;
+    isLibraryBook: boolean;
+    showDropdown: boolean;
+}
+
+    type InputFieldKeys = "title" | "comment" | "isLibraryBook";
+
+// Redux props from connect
+const mapStateToProps = (state: any) => ({
+  loading: state.loadingBar
+});
+
+const mapDispatchToProps = {
+  handleAddBook
+};
+
+const connector = connect(mapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+// Combine Redux props with router props
+type SearchFormProps = PropsFromRedux & RouteComponentProps;
+
+class SearchForm extends Component<SearchFormProps, SearchFormState> {
+    baseState: SearchFormState;
+
+    state: SearchFormState = {
+        book: {},
+        title: "",
+        date: "",
+        comment: "",
+        rate: 0,
+        isLibraryBook: false,
+        showDropdown: false,
+    };
+
+    constructor(props: SearchFormProps) {
         super(props);
-        this.state = {
-            book: {},
-            title: '',
-            date: '',
-            comment: '',
-            rate: 0,
-            isLibraryBook: false,
-            showDropdown: false
-        };
 
         // perserve the initial state in a new object
         this.baseState = this.state;
     }
 
-    setDate = (date) => {
+    setDate = (date: string) => {
         this.setState({
-            date
+            date,
         });
     };
 
@@ -37,11 +72,8 @@ class SearchForm extends Component {
     - need it to make the Dropdown Component render when title changes 
        - this.state.showDropdown will always be true after first time showing the dropdown which is responsibe for displaying the dropdown 
        - prevState.showDropdown will only be false at first update which will cause componentDidUpdate not to run */
-    componentDidUpdate(_, prevState) {
-        if (
-            this.state.title !== prevState.title &&
-            this.state.showDropdown === prevState.showDropdown
-        ) {
+    componentDidUpdate(_: SearchFormProps, prevState: SearchFormState) {
+        if (this.state.title !== prevState.title && this.state.showDropdown === prevState.showDropdown) {
             this.setState({ showDropdown: true });
         }
     }
@@ -55,7 +87,7 @@ class SearchForm extends Component {
     };
 
     /* set the title and book when user has clicked on a book from the dropdown */
-    handleTitle = (book) => {
+    handleTitle = (book: BookType) => {
         const { title } = book.volumeInfo;
         this.setState({ title, book, showDropdown: false });
     };
@@ -65,31 +97,33 @@ class SearchForm extends Component {
         const { book, date, comment, isLibraryBook, rate } = this.state;
         this.props
             .handleAddBook({ ...book, date, comment, isLibraryBook, rate })
-            .then(() => this.props.history.push('/'))
+            .then(() => this.props.history.push("/"))
             .catch(() => {
-                alert('Cannot add book. Book already in your list. Try adding a different book.');
+                alert("Cannot add book. Book already in your list. Try adding a different book.");
                 this.resetForm();
             });
     };
 
     /* set the rate of book when user clicks on star */
-    setRate = (value) => {
+    setRate = (value: number) => {
         this.setState({ rate: value });
     };
 
-    handleInputChange = (e) => {
+    handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const target = e.target;
-        const value = target.type === 'checkbox' ? target.checked : target.value;
-        const name = target.name;
-        this.setState({ [name]: value });
+        const value = target.type === "checkbox" ? (target as HTMLInputElement).checked : target.value;
+        const name = target.name as InputFieldKeys;
+      this.setState({ [name]: value } as Pick<SearchFormState, InputFieldKeys>);
     };
 
     render() {
-        const history = this.props.history
+        const history = this.props.history;
         const { title, comment, isLibraryBook, rate, showDropdown } = this.state;
         return (
             <div className="search-grid">
-                <button className="btn" onClick={() => history.goBack()}>
+                <button
+                    className="btn"
+                    onClick={() => history.goBack()}>
                     Go Back
                 </button>
                 <form action="">
@@ -105,8 +139,12 @@ class SearchForm extends Component {
                             />
                         </div>
                         {/* show dropdown if title value is not empty and user has not chosen a book */}
-                        {showDropdown &&
-                            title.length > 0 && <Dropdown query={title} setTitle={this.handleTitle} />}
+                        {showDropdown && title.length > 0 && (
+                            <Dropdown
+                                query={title}
+                                setTitle={this.handleTitle}
+                            />
+                        )}
                     </div>
 
                     <DatePicker handleDate={this.setDate} />
@@ -116,7 +154,7 @@ class SearchForm extends Component {
                             type="checkbox"
                             id="isLibraryBook"
                             name="isLibraryBook"
-                            value={isLibraryBook}
+                            checked={isLibraryBook}
                             onChange={this.handleInputChange}
                         />
                     </div>
@@ -130,10 +168,16 @@ class SearchForm extends Component {
                         />
                     </div>
                     <div className="form-group">
-                        <AddRating setRate={this.setRate} rate={rate} />
+                        <AddRating
+                            setRate={this.setRate}
+                            rate={rate}
+                        />
                     </div>
                 </form>
-                <a className="btn btn--form" type="button" onClick={this.handleAdd}>
+                <a
+                    className="btn btn--form"
+                    type="button"
+                    onClick={this.handleAdd}>
                     ADD
                 </a>
             </div>
@@ -141,13 +185,4 @@ class SearchForm extends Component {
     }
 }
 
-export default withRouter(
-    connect(
-        ({ loadingBar }) => {
-            return {
-                loading: loadingBar
-            };
-        },
-        { handleAddBook }
-    )(SearchForm)
-);
+export default withRouter(connector(SearchForm));

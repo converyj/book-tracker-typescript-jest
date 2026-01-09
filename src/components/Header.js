@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './header.css';
 import { PropTypes } from 'prop-types';
+import { Link } from 'react-router-dom';
 
 /**
  * @description Display the filtering options 
@@ -38,6 +39,7 @@ export class Header extends Component {
 						</option>
 					))}
 				</select>
+                <Link to="/search">Add Book</Link>
 			</header>
 		);
 	}

@@ -10,11 +10,13 @@ import { BrowserRouter } from 'react-router-dom';
 
 const store = createStore(reducers, middleware);
 
+const rootElement = document.getElementById("root") as HTMLElement;
+
 ReactDOM.render(
 	<BrowserRouter>
 		<Provider store={store}>
 			<App />
 		</Provider>
 	</BrowserRouter>,
-	document.getElementById('root')
+	rootElement
 );
