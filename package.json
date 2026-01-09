@@ -11,6 +11,8 @@
 		"@testing-library/jest-dom": "^5.11.9",
 		"@testing-library/react": "^11.2.5",
 		"@testing-library/user-event": "^12.6.3",
+		"@types/jest": "^30.0.0",
+		"@types/node": "^25.0.3",
 		"date-fns": "^2.29.3",
 		"exceljs": "^4.3.0",
 		"file-saver": "^2.0.5",
@@ -27,6 +29,7 @@
 		"recompose": "^0.30.0",
 		"redux": "^4.0.0",
 		"redux-thunk": "^2.3.0",
+		"typescript": "^4.9.5",
 		"web-vitals": "^1.1.0",
 		"xlsx": "^0.18.5"
 	},
@@ -55,5 +58,11 @@
 		]
 	},
 	"description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
-	"main": "index.js"
+	"main": "index.js",
+	"devDependencies": {
+		"@types/react": "^16.14.56",
+  "@types/react-dom": "^16.9.19",
+  "@types/jest": "^27.5.2",
+  "@types/node": "^16.18.68"
+	}
 }
