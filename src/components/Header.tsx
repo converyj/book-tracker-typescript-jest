@@ -1,12 +1,24 @@
-import React, { Component } from 'react';
+import React, { ChangeEvent, Component } from 'react';
+
 import './header.css';
-import { PropTypes } from 'prop-types';
+
+/* ---------- Types ---------- */
+
+interface HeaderState {
+    query: string;
+    sortOptions: string[];
+}
+
+interface HeaderProps {
+    filterBooks: (e: ChangeEvent<HTMLInputElement>) => void;
+    handleSortedList: (e: ChangeEvent<HTMLSelectElement>) => void;
+}
 
 /**
  * @description Display the filtering options 
  */
-export class Header extends Component {
-	state = {
+class Header extends Component<HeaderProps, HeaderState> {
+	state: HeaderState = {
 		query: '',
 		sortOptions: [
 			'By Author',
@@ -21,12 +33,12 @@ export class Header extends Component {
 					type="text"
 					placeholder="Search By Title"
 					aria-label="Search"
-					onChange={(e) => this.props.filterBooks(e)}
+					onChange={(e: ChangeEvent<HTMLInputElement>) => this.props.filterBooks(e)}
 				/>
 
 				<select
 					name="sort"
-					onChange={(e) => this.props.handleSortedList(e)}
+					onChange={(e: ChangeEvent<HTMLSelectElement>) => this.props.handleSortedList(e)}
 					aria-label="Sort By"
 					defaultValue="Sort By">
 					<option value="Sort By" disabled>
@@ -42,10 +54,5 @@ export class Header extends Component {
 		);
 	}
 }
-
-Header.propTypes = {
-	filterBooks: PropTypes.func.isRequired,
-	handleSortedList: PropTypes.func.isRequired
-};
 
 export default Header;

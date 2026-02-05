@@ -4,20 +4,23 @@ import React, { useState, useEffect } from 'react';
 import MomentUtils from '@date-io/moment';
 
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
-import { PropTypes } from 'prop-types';
 
 /**
  * @description Material UI Component responsible for allowing user to choose date they read book 
  */
 
-export default function DatePicker({ handleDate }) {
+type DatePickerProps = {
+	handleDate: (date: string) => void;
+};
+
+const DatePicker: React.FC<DatePickerProps> = ({ handleDate }) => {
 	// The first commit of Material-UI
 	const [
 		selectedDate,
 		setSelectedDate
-	] = useState(moment());
+	] = useState<moment.Moment | null>(moment());
 
-	function handleDateChange(date) {
+	function handleDateChange(date: moment.Moment | null) {
 		setSelectedDate(date);
 	}
 
@@ -52,6 +55,4 @@ export default function DatePicker({ handleDate }) {
 	);
 }
 
-DatePicker.propTypes = {
-	handleDate: PropTypes.func.isRequired
-};
+export default DatePicker;

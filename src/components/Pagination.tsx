@@ -1,14 +1,32 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { loadNewPage, loadExactPage } from './../actions/books';
-import { withRouter } from 'react-router-dom';
+import { connect, ConnectedProps } from 'react-redux';
+import { loadNewPage, loadExactPage } from '../actions/books';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import './pagination.css';
 
+/* ---------- Types ---------- */
+const mapStateToProps = (state: any) => ({
+    filteredPages: state.books.filteredPages,
+    totalPages: state.books.totalPages,
+    currentPage: state.books.currentPage,
+    filteredBooks: state.books.filteredBooks
+});
+
+const mapDispatchToProps = {
+    loadNewPage,
+    loadExactPage
+};
+
+const connector = connect(mapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+type PaginationProps = PropsFromRedux & RouteComponentProps;
 /**
  * @description Responsible for handling the different pages
  */
 
-class Pagination extends Component {
+class Pagination extends Component<PaginationProps> {
     // go to next page
     nextPage = () => {
         this.props.loadNewPage({ page: 1 });
@@ -20,7 +38,7 @@ class Pagination extends Component {
     };
 
     // go to exact page
-    goToPage = (page) => {
+    goToPage = (page: number) => {
         this.props.loadExactPage({ page });
     };
 
@@ -40,7 +58,7 @@ class Pagination extends Component {
                             className="btn pagination-next"
                             onClick={this.nextPage}
                             disabled={
-                                filteredPages == currentPage || currentPage == totalPages ? true : false
+                                filteredPages === currentPage || currentPage === totalPages ? true : false
                             }>
                             Next Page
                         </button>
@@ -52,7 +70,7 @@ class Pagination extends Component {
                         ].map((_, index) => (
                             <button
                                 key={index}
-                                className={`btn ${currentPage || filteredPages === index + 1 && 'is-current'}`}
+                                className={`btn ${currentPage || (filteredPages === index + 1 && 'is-current')}`}
                                 onClick={() => this.goToPage(index + 1)}>
                                 {index + 1}
                             </button>
@@ -64,16 +82,4 @@ class Pagination extends Component {
     }
 }
 
-export default withRouter(
-    connect(
-        ({ books }) => {
-            return {
-                filteredPages: books.filteredPages,
-                totalPages: books.totalPages,
-                currentPage: books.currentPage,
-                filteredBooks: books.filteredBooks
-            };
-        },
-        { loadExactPage, loadNewPage }
-    )(Pagination)
-);
+export default withRouter(connector(Pagination));

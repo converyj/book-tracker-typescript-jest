@@ -4,17 +4,31 @@ import './commentField.css';
 import { connect } from 'react-redux';
 import { handleBookComment } from '../actions/books';
 
+
+interface CommentFieldProps {
+	comment: string;
+	id: string;
+	show: () => void;
+    handleBookComment: (id: string, comment: string) => Promise<void>;
+}
+
+interface CommentFieldState {
+	comment: string;
+}
+
 /**
  * @description Responsible for displaying the book comment and allowing user to update it 
  */
 
-class CommentField extends Component {
-	state = {
+class CommentField extends Component<CommentFieldProps, CommentFieldState> {
+	private commentField: HTMLTextAreaElement | null = null;
+
+	state: CommentFieldState = {
 		comment: this.props.comment
 	};
 
 	componentDidMount() {
-		this.commentField.focus();
+		this.commentField?.focus();
 	}
 
 	render() {
@@ -43,11 +57,5 @@ class CommentField extends Component {
 		);
 	}
 }
-
-CommentField.propTypes = {
-	comment: PropTypes.string.isRequired,
-	id: PropTypes.string.isRequired,
-	show: PropTypes.func.isRequired
-};
 
 export default connect(null, { handleBookComment })(CommentField);

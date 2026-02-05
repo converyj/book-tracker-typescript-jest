@@ -1,32 +1,41 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import './dropdown.css';
-import { trancateTitle } from './../utils/helper';
+
+import { BookType } from './Book';
+
 import { searchBook } from '../utils/api';
-import { PropTypes } from 'prop-types';
+
+import { trancateTitle } from '../utils/helper';
+
 import Spinner from './Spinner';
+
+import './dropdown.css';
+
+type DropdownProps = {
+	query: string;
+	setTitle: (book: BookType) => void;
+};
 
 /**
  * @description Responsible for displaying the list of books 
  */
 
-export default function Dropdown({ query, setTitle }) {
+const Dropdown: React.FC<DropdownProps> = ({ query, setTitle }) => {
     const [
         books,
         setBooks
-    ] = useState({});
+    ] = useState<BookType[]>([]);
     const [
         selected,
         setSelected
-    ] = useState({});
+    ] = useState<BookType[]>([]);
 
     /* updates the list of books whenever query changes only if component is mounted (dropdown is showing only if query is not empty)*/
-    useEffect(
-        () => {
+    useEffect(() => {
             let mounted = true;
             const search = () =>
                 searchBook(query)
-                    .then((allBooks) => {
-                        const filteredArr = allBooks.filter((book) => {
+                    .then((allBooks: BookType[]) => {
+                        const filteredArr = allBooks.filter((book: BookType) => {
                             return (
                                 book.volumeInfo.hasOwnProperty('authors') &&
                                 book.volumeInfo.hasOwnProperty('imageLinks')
@@ -36,7 +45,9 @@ export default function Dropdown({ query, setTitle }) {
                     })
                     .catch(() => alert('Cannot fetch books. Please try again.'));
             search();
-            return () => (mounted = false);
+            return () => {
+                mounted = false;
+            };
         },
         [
             query
@@ -45,8 +56,8 @@ export default function Dropdown({ query, setTitle }) {
 
     /* Callback function to set the selected book that was clicked on from the list of books */
     const handleBook = useCallback(
-        (id, books) => {
-            setSelected(Object.values(books).filter((book) => book.id === id));
+        (id: string | number, books: BookType[]) => {
+            setSelected(Object.values(books).filter((book: BookType) => book.id === id));
         },
         [
             selected
@@ -72,9 +83,12 @@ export default function Dropdown({ query, setTitle }) {
                     {Object.values(books).map((book) => (
                         <li
                             key={book.id}
-                            id={book.id}
+                            id={String(book.id ?? '')}
                             onClick={(e) =>
-                                handleBook(e.target.closest('.search-book-list__item').id, books)}
+                                handleBook(
+                                    (e.currentTarget as HTMLElement).closest('.search-book-list__item')?.id ?? '',
+                                    books
+                                )}
                             className="search-book-list__item">
                             <img
                                 src={
@@ -99,7 +113,4 @@ export default function Dropdown({ query, setTitle }) {
     );
 }
 
-Dropdown.propTypes = {
-    query: PropTypes.string.isRequired,
-    setTitle: PropTypes.func
-};
+export default Dropdown;

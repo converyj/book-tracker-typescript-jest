@@ -1,23 +1,51 @@
-import React, { Component, Fragment } from 'react';
-import { sortByDate, sortByAuthor, filterByValue, recieveBooks } from './../actions/books';
+import React, { Component, Fragment, ChangeEvent } from 'react';
+import { sortByDate, sortByAuthor, filterByValue, recieveBooks } from '../actions/books';
 import { getDatabase, ref, remove, get, query, orderByKey, startAt, limitToFirst } from "firebase/database";
 import { connect } from 'react-redux';
-import Book from './../components/Book';
+import Book, { BookType } from './Book';
 import './bookList.css';
 import Pagination from './Pagination';
 import { exportBooks, formatImportBook } from '../utils/helper';
 import * as XLSX from 'xlsx';
 import { getBookByVolume, saveBook } from '../utils/api';
+
+type AppliedFilter = 'FILTER_BY_VALUE' | 'SORT_BY_DATE' | 'SORT_BY_AUTHOR';
+
+export type BooksSlice = {
+    books: BookType[];
+    filteredBooks: BookType[];
+    filteredPages: number;
+    appliedFilters: AppliedFilter[];
+};
+
+type ImportedRow = {
+    Id?: string | number;
+    Title?: string;
+    [key: string]: unknown;
+};
+
+interface BookListProps {
+    books: BooksSlice;
+    sortByDate: () => void;
+    sortByAuthor: () => void;
+    recieveBooks: (books: BookType[]) => void;
+}
+
+interface BookListState {
+    data: BookType[];
+    isLoading: boolean;
+}
+
 /**
  * @description Display list of books user has read 
  */
-export class BookList extends Component {
-    state = {
+export class BookList extends Component<BookListProps, BookListState> {
+    state: BookListState = {
         data: [],
         isLoading: false
     }
 
-    componentDidUpdate(prevProps, _) {
+    componentDidUpdate(prevProps: BookListProps) {
         // if filter by value was applied but is now not applied and there are still filters, refresh the book list to apply the filter
         if (
             prevProps.books.appliedFilters.includes('FILTER_BY_VALUE') &&
@@ -40,22 +68,28 @@ export class BookList extends Component {
     }
 
     // handle the file upload and processing
-    handleFileUpload = (e) => {
-
-        const file = e.target.files[0];
+    handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) {
+            return;
+        }
         const reader = new FileReader();
 
-        reader.onload = async (event) => {
-            const workbook = XLSX.read(event.target.result, { type: 'binary' });
+        reader.onload = async (event: ProgressEvent<FileReader>) => {
+            const result = event.target?.result;
+            if (!result) {
+                return;
+            }
+            const workbook = XLSX.read(result, { type: 'binary' });
             const sheetName = workbook.SheetNames[0];
             const sheet = workbook.Sheets[sheetName];
-            const sheetData = XLSX.utils.sheet_to_json(sheet);
+            const sheetData = XLSX.utils.sheet_to_json<ImportedRow>(sheet);
 
 
             try {
                 this.setState({ isLoading: true })
                 // Delete the existing collection of books
-                await this.deleteCollection(localStorage.userID);
+                await this.deleteCollection(localStorage.userID as string);
 
                 // Get formatted books with delay between requests
                 const books = await this.getFormattedBooks(sheetData);
@@ -79,9 +113,9 @@ export class BookList extends Component {
         reader.readAsBinaryString(file);
     };
 
-    getFormattedBooks = async (data) => {
-        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-        let books = [];
+    getFormattedBooks = async (data: ImportedRow[]) => {
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+        const books: BookType[] = [];
 
         for (const book of data) {
             try {
@@ -106,7 +140,7 @@ export class BookList extends Component {
         return books;
     };
 
-    deleteCollection = async (userID, batchSize = 10) => {
+    deleteCollection = async (userID: string, batchSize = 10) => {
         try {
             const db = getDatabase()
 
@@ -114,7 +148,7 @@ export class BookList extends Component {
             const booksRef = ref(db, `users/${userID}/books/`);
 
             // Function to delete a batch of books
-            const deleteBatch = async (books) => {
+            const deleteBatch = async (books: { key: string }[]) => {
                 const deletePromises = books.map(book => {
                     const bookRef = ref(db, `users/${userID}/books/${book.key}`);
                     return remove(bookRef);
@@ -124,7 +158,7 @@ export class BookList extends Component {
             };
 
             let hasMore = true;
-            let lastKey = null;
+            let lastKey: string | null = null;
 
             while (hasMore) {
                 // Fetch a batch of books eg. 11 - one more than batch size to check if there are more than 10 books left 
@@ -135,7 +169,7 @@ export class BookList extends Component {
                 const snapshot = await get(booksQuery);
 
                 if (snapshot.exists()) {
-                    const books = snapshot.val();
+                    const books = snapshot.val() as Record<string, unknown>;
                     const bookKeys = Object.keys(books);
 
                     // Check if we fetched more than the batch size
@@ -190,8 +224,8 @@ export class BookList extends Component {
                         {filteredPages > 0 && <Pagination />}
                         <div className="books-grid">
                             {filteredBooks && filteredBooks !== null && filteredBooks.length > 0 ? (
-                                filteredBooks.map((book, index) => (
-                                    <Book key={index} book={book} id={book.id} />
+                                filteredBooks.map((book: BookType, index: number) => (
+                                    <Book key={index} book={book} />
                                 ))
                             ) : (
                                 <h1>No Books</h1>
@@ -206,7 +240,7 @@ export class BookList extends Component {
 }
 
 export default connect(
-    ({ books, loadingBar }) => {
+    ({ books, loadingBar }: { books: BooksSlice; loadingBar: unknown }) => {
         return {
             books,
             loading: loadingBar

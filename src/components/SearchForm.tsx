@@ -174,12 +174,11 @@ class SearchForm extends Component<SearchFormProps, SearchFormState> {
                         />
                     </div>
                 </form>
-                <a
+                <button
                     className="btn btn--form"
-                    type="button"
                     onClick={this.handleAdd}>
                     ADD
-                </a>
+                </button>
             </div>
         );
     }

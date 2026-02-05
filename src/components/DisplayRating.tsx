@@ -1,12 +1,17 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+
+import { BookType } from './Book';
 
 import Star from './Star';
+
+type DisplayRatingProps = {
+	book: BookType;
+};
 
 /**
  * @description Displays the rating number from the book object
  */
-const DisplayRating = ({ book }) => {
+const DisplayRating: React.FC<DisplayRatingProps> = ({ book }) => {
 	const { rate } = book;
 	return (
 		<div>
@@ -14,10 +19,6 @@ const DisplayRating = ({ book }) => {
 			<Star value={rate} />
 		</div>
 	);
-};
-
-DisplayRating.propTypes = {
-	book: PropTypes.object.isRequired
 };
 
 export default DisplayRating;

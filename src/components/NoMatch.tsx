@@ -1,11 +1,11 @@
+import React from "react";
+
 /*
 NoMatch Component: 
  - Show error if user tries to access wrong url 
 */
 
-import React from "react";
-
-const NoMatch = () => {
+const NoMatch: React.FC = () => {
 	return (
 		<div style={{ textAlign: "center", fontSize: 22 }}>
 			<h5>404 Match Error</h5>
