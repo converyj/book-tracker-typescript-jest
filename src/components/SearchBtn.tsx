@@ -5,7 +5,7 @@ import './searchBtn.css';
 /**
  * @description Holds the Search Button on the Home page to link to the Search page 
  */
-const SearchBtn = () => {
+const SearchBtn: React.FC = () => {
 	return (
 		<div className="open-search">
 			<Link to="/search">

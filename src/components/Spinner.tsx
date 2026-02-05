@@ -5,7 +5,7 @@ import spinner from '../icons/spinner.gif';
 /**
  * @description Holds the Loading image when waiting for books to be fetched from the BookAPI
  */
-export default () => {
+const Spinner: React.FC = () => {
 	return (
 		<div>
 			<img
@@ -20,3 +20,5 @@ export default () => {
 		</div>
 	);
 };
+
+export default Spinner;

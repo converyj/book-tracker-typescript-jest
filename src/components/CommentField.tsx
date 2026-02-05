@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import './commentField.css';
 import { connect } from 'react-redux';
 import { handleBookComment } from '../actions/books';

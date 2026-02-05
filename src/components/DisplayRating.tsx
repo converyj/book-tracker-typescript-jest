@@ -6,6 +6,7 @@ import Star from './Star';
 
 type DisplayRatingProps = {
 	book: BookType;
+	disabled?: boolean;
 };
 
 /**
